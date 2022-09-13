@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html>
+  
+  <head>
+         <title>Test item</title>
+  </head>
+  <body>
+    <section>
+      <div class="item">
+        <div class="description">
+          <h3>{{ item.name }}</h3>
+          <h4>Описание:</p>{{ item.description }}</h4>
+          <h5>Цена, напривер в $:</p>{{ item.price }}</h5>
+        </div>
+      </div>
+      <button type="button" id="checkout-button">Checkout</button>
+      <hr />
+    </section>
+    {% csrf_token %}
+  </body>
+</html>

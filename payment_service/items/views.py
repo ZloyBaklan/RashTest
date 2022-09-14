@@ -1,12 +1,13 @@
 import stripe
 import json
 from django.conf import settings
+from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.core.paginator import Paginator
 
 from .models import Item
-from .serializers import ItemSerializer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -58,3 +59,14 @@ class Success_View(TemplateView):
 class Cancel_View(TemplateView):
     template_name = "cancel.html"
 
+def index(request):
+    items_list = Item.objects.all()
+    paginator = Paginator(items_list, 10)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    context = {
+        'paginator': paginator,
+        'page': page,
+        "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
+    }
+    return render(request, 'mainpage.html', context)

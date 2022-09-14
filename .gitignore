@@ -128,4 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+файл пробник.txt
 __init__.py

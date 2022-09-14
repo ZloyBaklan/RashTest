@@ -6,10 +6,12 @@ from .views import (
     Item_Page_View,
     Success_View,
     Cancel_View,
+    index
 )
 
 
 urlpatterns = [
+    path('', index, name='all'),
     path('buy/<pk>/', Item_Page_View.as_view(), name='main_item_page'),
     path('item/<pk>/',
          Create_Checkout_Session_Item_View.as_view(),

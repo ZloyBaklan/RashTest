@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Lets Buy {{ product.name }}</title>
+    <title>Lets Buy {{ product.owner }}</title>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
   </head>
   <body>
-    <h1>{{ product.name }}</h1>
-    <p>Description of product:</p>{{ product.description }}</p>
-    <p>Price(in cents):</p>{{ product.price }}</p>
+    <h1>Заказ номер: {{ product.id }}</h1>
+    <p>В количесвте единиц:</p>{{ product.count}}</p>
+    <p>Price(in cents):</p>{{ product.total }}</p>
     <button id="buy-button">Buy</button>
     {% csrf_token %}
   </body>

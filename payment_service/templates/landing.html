@@ -4,19 +4,47 @@
   
   <head>
          <title>Test item</title>
+         <script src="https://js.stripe.com/v3/"></script>
+         <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
   </head>
   <body>
     <section>
       <div class="item">
         <div class="description">
-          <h3>{{ item.name }}</h3>
-          <h4>Описание:</p>{{ item.description }}</h4>
-          <h5>Цена, напривер в $:</p>{{ item.price }}</h5>
+          <h3>{{ product.name }}</h3>
+          <h4>Описание:</p>{{ product.description }}</h4>
+          <h5>Цена, например в $:</p>{{ product.price }}</h5>
         </div>
       </div>
       <button type="button" id="checkout-button">Checkout</button>
-      <hr />
     </section>
     {% csrf_token %}
   </body>
+  <script type="text/javascript">
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+    var checkoutButton = document.getElementById("checkout-button");
+    checkoutButton.addEventListener("click", function () {
+      fetch("{% url 'create_session_page' product.id %}", {
+        method: "POST",
+        headers: {
+            'X-CSRFToken': csrftoken
+        }
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (session) {
+          return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function (result) {
+          if (result.error) {
+            alert(result.error.message);
+          }
+        })
+        .catch(function (error) {
+          console.error("Error:", error);
+        });
+    });
+    </script>
 </html>

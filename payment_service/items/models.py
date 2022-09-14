@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.core.validators import MinValueValidator
 
 
@@ -10,7 +11,7 @@ class Item(models.Model):
     price = models.PositiveSmallIntegerField(
         default=0,
         validators=[MinValueValidator(0, 'Значение не может быть меньше 0')],
-        verbose_name='Стоимость',
+        verbose_name='Стоимость', help_text='В центах, на сайте в $'
     )
 
 
@@ -20,6 +21,9 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("create_session_page", kwargs={"id" : self.pk})
 
     '''
     price = models.CharField(max_length=7, default=0,

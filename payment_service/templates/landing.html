@@ -13,7 +13,7 @@
         <div class="description">
           <h3>{{ product.name }}</h3>
           <h4>Описание:</p>{{ product.description }}</h4>
-          <h5>Цена, например в $:</p>{{ product.price }}</h5>
+          <h5>Цена, например в центах:</p>{{ product.price }}</h5>
         </div>
       </div>
       <button type="button" id="checkout-button">Checkout</button>
@@ -25,8 +25,8 @@
     var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
     var checkoutButton = document.getElementById("checkout-button");
     checkoutButton.addEventListener("click", function () {
-      fetch("{% url 'create_session_page' product.id %}", {
-        method: "POST",
+      fetch(href="{{ product.get_absolute_url }}", {
+        method: "GET",
         headers: {
             'X-CSRFToken': csrftoken
         }

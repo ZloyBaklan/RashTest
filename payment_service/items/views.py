@@ -14,7 +14,7 @@ class Item_Page_View(TemplateView):
     template_name = "landing.html"
 
     def get_context_data(self, **kwargs):
-        item = Item.objects.get(name='Test')
+        item = Item.objects.get(id=self.kwargs['pk'])
         context = super(Item_Page_View, self).get_context_data(**kwargs)
         context.update({
             "product": item,
@@ -23,7 +23,7 @@ class Item_Page_View(TemplateView):
         return context
 
 class Create_Checkout_Session_Item_View(View):
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         item_id = self.kwargs['pk']
         item = Item.objects.get(id=item_id)
         checkout_session = stripe.checkout.Session.create(

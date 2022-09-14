@@ -23,7 +23,7 @@ class Item(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("create_session_page", kwargs={"id" : self.pk})
+        return reverse("create_session_page", kwargs={"pk" : self.pk})
 
     '''
     price = models.CharField(max_length=7, default=0,

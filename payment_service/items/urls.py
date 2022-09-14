@@ -10,8 +10,8 @@ from .views import (
 
 
 urlpatterns = [
-    path('', Item_Page_View.as_view(), name='main_item_page'),
-    path('create_session_for_item/<pk>/',
+    path('buy/<pk>/', Item_Page_View.as_view(), name='main_item_page'),
+    path('item/<pk>/',
          Create_Checkout_Session_Item_View.as_view(),
          name='create_session_page'
         ),

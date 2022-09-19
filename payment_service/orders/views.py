@@ -94,8 +94,10 @@ class Create_Checkout_Session_Order_View(View):
     def get(self, request, *args, **kwargs):
         order_id = self.kwargs['pk']
         order = Order.objects.get(id=order_id)
-        checkout_session = stripe.checkout.Session.create(
+        if request.user.is_authenticated:
+            checkout_session = stripe.checkout.Session.create(
             customer_email = order.user.email,
+            allow_promotion_codes = True,
             payment_method_types=['card'],
             line_items=[
                 {
@@ -112,10 +114,14 @@ class Create_Checkout_Session_Order_View(View):
             mode='payment',
             success_url='http://127.0.0.1:8000/success/',
             cancel_url='http://127.0.0.1:8000/cancel/',
-        )
-        return JsonResponse({
-            'id': checkout_session.id
-        })
+            )
+            order.status = 'STATUS_PAID'
+            order.save()
+            return JsonResponse({
+                'id': checkout_session.id
+            })
+        else:
+            return redirect('home')
 
 
 '''
@@ -129,19 +135,6 @@ stripe.PaymentIntent.create(
     'order_id': '6735',
   },
 )
-
-'''
-
-
-
-'''
-def checkout(request):
-    if request.user.is_authenticated:
-        cart = Profile.objects.get(user= request.user).cart
-        total = cart.aggregate(Sum('price'))['price__sum']
-        return render(request,"checkout.html", {"cart":cart, "total":total})
-    else:
-        redirect('home')
 
 
 class PaymentSuccessView(TemplateView):
@@ -183,111 +176,4 @@ def createpayment(request):
                     settings.STRIPE_PUBLIC_KEY, 'clientSecret': intent.client_secret})
             except Exception as e:
                 return JsonResponse({'error':str(e)},status= 403)
-'''
-
-'''
-def basket_adding(request):
-    return_dict = dict()
-    session_key = request.session.session_key
-    print (request.POST)
-    data = request.POST
-    product_id = data.get("product_id")
-    nmb = data.get("nmb")
-    is_delete = data.get("is_delete")
-
-    if is_delete == 'true':
-        ProductInBasket.objects.filter(id=product_id).update(is_active=False)
-    else:
-        new_product, created = ProductInBasket.objects.get_or_create(session_key=session_key, product_id=product_id,
-                                                                     is_active=True, defaults={"nmb": nmb})
-        if not created:
-            print ("not created")
-            new_product.nmb += int(nmb)
-            new_product.save(force_update=True)
-
-    #common code for 2 cases
-    products_in_basket = ProductInBasket.objects.filter(session_key=session_key, is_active=True, order__isnull=True)
-    products_total_nmb = products_in_basket.count()
-    return_dict["products_total_nmb"] = products_total_nmb
-
-    return_dict["products"] = list()
-
-    for item in  products_in_basket:
-        product_dict = dict()
-        product_dict["id"] = item.id
-        product_dict["name"] = item.product.name
-        product_dict["price_per_item"] = item.price_per_item
-        product_dict["nmb"] = item.nmb
-        return_dict["products"].append(product_dict)
-
-    return JsonResponse(return_dict)
-'''
-
-'''
-def test_view(request):
-    """ This view displays what is in a user's cart. """
-    # Based on the user who is making the request, grab the cart object
-    owner = User.objects.filter(email='39359760@yandex.ru')
-    my_order = Order.objects.get_or_create(owner=owner)
-    # Get a queryset of entries that correspond to "my_cart"
-    list_of_entries = Entry.objects.filter(order=2)
-    print(owner)
-    print(my_order)
-    print(list_of_entries)
-    items = Item.objects.all()
-    print(items)
-
-    if request.POST:
-        # Get the product's ID from the POST request.
-        item_id = request.POST.get('item_id')
-        # Get the object using our unique primary key
-        item_obj = Item.objects.get(id=item_id)
-        # Get the quantity of the product desired.
-        item_quantity = request.POST.get('item_quantity')
-        # Create the new Entry...this will update the cart on creation
-        Entry.objects.create(cart=my_order, item=item_obj, quantity=item_quantity)
-        return HttpResponse('mainpage.html')
-
-    return render(request, 'index.html', {'my_order': my_order, 'list_of_entries': list_of_entries,
-                                              'items': items})
-
-class Order_Page_View(TemplateView):
-    template_name = "mainpage.html"
-
-    def get_context_data(self, **kwargs):
-        order = Order.objects.get(id=self.kwargs['pk'])
-        context = super(Order_Page_View, self).get_context_data(**kwargs)
-        context.update({
-            "product": order,
-            "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
-        })
-        return context
-
-class Create_Checkout_Session_Order_View(View):
-    def get(self, request, *args, **kwargs):
-        order_id = self.kwargs['pk']
-        order = Order.objects.get(id=order_id)
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'usd',
-                        'unit_amount': order.total,
-                        'product_data': {
-                            'name': f'Заказ № {order_id}',
-                            'description': f'Единиц товара: {order.count}',
-                        },
-                    },
-                    'quantity': 1,
-                },
-            ],
-            mode='payment',
-            success_url='http://127.0.0.1:8000/success/',
-            cancel_url='http://127.0.0.1:8000/cancel/',
-        )
-
-        return JsonResponse({
-            'id': checkout_session.id
-        })
 '''

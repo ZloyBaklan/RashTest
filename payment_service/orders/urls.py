@@ -1,6 +1,4 @@
-from cgi import test
-from django.urls import include, path
-from django.views.generic import TemplateView
+from django.urls import path
 
 from .views import OrderHistoryListView, add_item_to_cart, Order_Page_View, Create_Checkout_Session_Order_View, cart_view, CartDeleteItem
 
@@ -16,6 +14,4 @@ urlpatterns = [
          Create_Checkout_Session_Order_View.as_view(),
          name='create_session_order_page'
         ),
-    # path('basket_adding/', basket_adding, name='basket_adding'),
-    #path('checkout/', checkout, name = 'create_session_page' )
 ]

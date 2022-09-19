@@ -1,8 +1,6 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .views import (
-    Create_Checkout_Session_Item_View,
     Item_Page_View,
     Success_View,
     Cancel_View,
@@ -10,7 +8,6 @@ from .views import (
     ItemCreateView,
     create_checkout_session
 )
-# from orders.views import PaymentSuccessView
 
 urlpatterns = [
     path('', ItemListView.as_view(), name='home'),

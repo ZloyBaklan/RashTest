@@ -6,17 +6,20 @@ from .views import (
     Item_Page_View,
     Success_View,
     Cancel_View,
-    index
+    ItemListView,
+    ItemCreateView,
+    create_checkout_session
 )
-
+# from orders.views import PaymentSuccessView
 
 urlpatterns = [
-    path('', index, name='all'),
-    path('buy/<pk>/', Item_Page_View.as_view(), name='main_item_page'),
+    path('', ItemListView.as_view(), name='home'),
+    path('create/', ItemCreateView.as_view(), name='create'),
+    path('buy/<pk>/', Item_Page_View.as_view(), name='detail'),
     path('item/<pk>/',
-         Create_Checkout_Session_Item_View.as_view(),
+         create_checkout_session,
          name='create_session_page'
         ),
-    path('cancel/', Cancel_View.as_view(), name='cancel'),
     path('success/', Success_View.as_view(), name='success'),
+    path('cancel/', Cancel_View.as_view(), name='cancel'),
 ]

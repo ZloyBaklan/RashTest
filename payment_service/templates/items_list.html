@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Product List</h1>
+<div class="container">
+    {% if items_list %}
+    <div class="row">
+
+
+        {% for i in items_list %}
+        <div class="col-sm-4">
+            <div class="card">
+                <form method="post" action="{% url 'add_item_to_cart' pk=i.id %}">
+                <div class="card-body">
+                    <h4 class="card-title">{{ i.name }}</h4>
+                    <p class="card-text">{{ i.description }}</p>
+                </div>
+                <div class="card-footer d-flex">
+                    <a href="{% url 'detail' pk=i.id %}" class="btn btn-success ml-auto">Force Buy</a>
+                </div>
+            </p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Price: {{ i.price }}</li>
+                <li class="list-group-item">
+                    {% csrf_token %}
+                    <label class="form-label" for="id_quantity">Quantity:</label>
+                    <input type="number" name="quantity" value="1" min="1"
+                           required id="id_quantity"/>
+                </li>
+            </ul>
+            <div class="card-body">
+                <button class="learn-more-btn" type="submit">Add to Order</button>
+            </div>
+            </div>
+        </div>
+        </form>
+        {% endfor %}
+
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-5">
+        The product list is empty. Please add some products first.
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

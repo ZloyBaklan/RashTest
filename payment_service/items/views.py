@@ -2,14 +2,33 @@ import stripe
 import json
 from django.conf import settings
 from django.shortcuts import render
+from django.urls import reverse
 from django.views import View
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.core.paginator import Paginator
+from django.views.generic.edit import CreateView
+from django.views.generic import ListView, DetailView
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+
+from django.urls import reverse_lazy
 
 from .models import Item
+from orders.models import Order
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+class ItemCreateView(CreateView):
+    model = Item
+    fields = '__all__'
+    template_name = "item_create.html"
+    success_url = reverse_lazy("home")
+
+class ItemListView(ListView):
+    model = Item
+    template_name = "items_list.html"
+    context_object_name = 'items_list'
 
 class Item_Page_View(TemplateView):
     template_name = "landing.html"
@@ -25,15 +44,17 @@ class Item_Page_View(TemplateView):
 
 class Create_Checkout_Session_Item_View(View):
     def get(self, request, *args, **kwargs):
+        # request_data = json.loads(request.body)
         item_id = self.kwargs['pk']
         item = Item.objects.get(id=item_id)
         checkout_session = stripe.checkout.Session.create(
+            # customer_email = request_data['email'],
             payment_method_types=['card'],
             line_items=[
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'unit_amount': item.price,
+                        'unit_amount': int(item.price * 100),
                         'product_data': {
                             'name': item.name,
                             'description': item.description,
@@ -43,14 +64,44 @@ class Create_Checkout_Session_Item_View(View):
                 },
             ],
             mode='payment',
-            success_url='http://127.0.0.1:8000/success/',
+            success_url='http://127.0.0.1:8000/orders/success/',
             cancel_url='http://127.0.0.1:8000/cancel/',
         )
-
         return JsonResponse({
             'id': checkout_session.id
         })
 
+
+@csrf_exempt
+def create_checkout_session(request, pk):
+
+    request_data = json.loads(request.body)
+    item = get_object_or_404(Item, pk=pk)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    checkout_session = stripe.checkout.Session.create(
+        # Customer Email is optional,
+        # It is not safe to accept email directly from the client side
+        customer_email = request_data['email'],
+        payment_method_types=['card'],
+        allow_promotion_codes = True,
+        line_items=[
+            {
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                    'name': item.name,
+                    },
+                    'unit_amount': int(item.price * 100),
+                },
+                'quantity': 1,
+            }
+        ],
+        mode='payment',
+        success_url='http://127.0.0.1:8000/success/',
+        cancel_url='http://127.0.0.1:8000/cancel/',
+    )
+    return JsonResponse({'sessionId': checkout_session.id})
 
 class Success_View(TemplateView):
     template_name = "success.html"
@@ -58,15 +109,3 @@ class Success_View(TemplateView):
 
 class Cancel_View(TemplateView):
     template_name = "cancel.html"
-
-def index(request):
-    items_list = Item.objects.all()
-    paginator = Paginator(items_list, 10)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-    context = {
-        'paginator': paginator,
-        'page': page,
-        "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
-    }
-    return render(request, 'mainpage.html', context)

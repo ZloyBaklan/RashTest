@@ -1,15 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Lets Buy {{ product.owner }}</title>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
-  </head>
-  <body>
-    <h1>Заказ номер: {{ product.id }}</h1>
-    <p>В количесвте единиц:</p>{{ product.count}}</p>
-    <p>Price(in cents):</p>{{ product.total }}</p>
-    <button id="buy-button">Buy</button>
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Product Detail</h1>
+<div class="container">
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Product Detail</h2>
+        </div>
+        <div class="card-body">
+            <div class="container row">
+                <div class="col-md-10">
+                 <h1>Страница подтверждения заказа</h1>
+                  <h2>Заказ номер: {{ order.id }}</h2>
+                   <p>Price:</p>{{ order.amount }}</p>
+                </div>
+              </div>
+          </div>
+      </div>
+      <div class="card-footer d-flex">
+          <button class="btn btn-success ml-auto" id="buy-button">Confirm order</button>
+      </div>
+  </div>
+</div>
     {% csrf_token %}
   </body>
     <script type='text/javascript'>
@@ -19,7 +33,7 @@
       buyButton.addEventListener('click', function() {
         // Create a new Checkout Session using the server-side endpoint 
         // Redirect to Stripe Session Checkout
-        fetch(href="{{ product.get_absolute_url }}", {
+        fetch(href="{{ order.get_absolute_url }}", {
           method: 'GET',
           headers: {
             'X-CSRFToken': csrftoken

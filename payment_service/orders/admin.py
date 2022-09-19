@@ -3,10 +3,10 @@ from .models import Order
 
 from django.utils.datetime_safe import datetime
 
-from .models import Order, Entry
+from .models import Order, Payment, OrderItem
 
 
-
+'''
 class EntryAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.order.total += obj.quantity * obj.item.price
@@ -14,7 +14,9 @@ class EntryAdmin(admin.ModelAdmin):
         obj.order.updated = datetime.now()
         obj.order.save()
         super().save_model(request, obj, form, change)
-
+'''
 # Register your models here.
 admin.site.register(Order)
-admin.site.register(Entry, EntryAdmin)
+admin.site.register(Payment)
+admin.site.register(OrderItem)
+

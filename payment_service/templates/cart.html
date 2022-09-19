@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for item in items %}
+    <div class="row">
+        <div class="col-12 col-md-1 item">
+            &nbsp;&nbsp;&nbsp;{{ forloop.counter }}
+        </div>
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Название единицы товара:</p>{{ item.product }}</h4>
+                    <p class="card-text">Цена за единицу товара:</p>{{ item.price }}</p>
+                    <p class="card-text">Количество единиц товара:</p>{{ item.quantity }}</p>
+                    <p class="card-text">Общая цена за выбранную позицию(с учетом количества):</p>{{ item.amount }}</p>
+                    <div class="col-12 col-md-1 item">
+                        <form method="post" action="{% url 'cart_delete_item' item.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" style="color: blue"><u>delete</u></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+<h5><class="card-title">Итого: {{ cart.amount }}</h5>
+<div class="card-footer d-flex">
+    <button id="buy-button">Создать интент на заказ</button>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script type="text/javascript">
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    let buyButton = document.getElementById('buy-button');
+    buyButton.removeAttribute('disabled');
+    buyButton.innerHTML = 'Создать интент на заказ';
+    buyButton.addEventListener('click', function () {
+        buyButton.innerHTML = 'Подождите, пожалуйста...';
+        buyButton.setAttribute('disabled', '');
+        fetch("{% url 'create_session_order_page' pk=cart.id %}", {method: 'GET'})
+            .then(function (response) {
+                return response.json()
+            })
+            .then(session => stripe.redirectToCheckout({sessionId: session.id}))
+    });
+</script>
+{% if not items %}
+<div class="col-12 col-md-2 item">
+   <h2> NO DATA</h2>
+</div>
+{% endif %}
+{% endblock content %}

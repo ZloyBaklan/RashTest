@@ -1,9 +1,16 @@
-<head>
-    Oh, mistake!
-</head>
-<body>
-    <h3>Mistakes...</h3>
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron text-center mt-5">
+        <h1 class="text-success">Oh, mistake!</h1>
+        <h3>Mistakes...</h3>
       <img
         src="https://www.meme-arsenal.com/memes/ff77dace71d6a3141cb12bcc1891f454.jpg"
-        alt="More Mistakes..."/>
-</body>
+        alt="More Mistakes..."/> 
+            <a href="{% url 'home' %}">home page</a>.
+        </p>
+    </div>
+</div>
+{% endblock content %}

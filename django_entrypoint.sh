@@ -1,5 +1,5 @@
 #!/bin/sh
-
+cd payment_service/
 # Запускаем миграции, загружаем фикстуры, собираем и сжимаем статику
 python manage.py makemigrations
 

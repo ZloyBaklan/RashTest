@@ -4,22 +4,11 @@
 # он не будет занимать много места при развёртывании.
 FROM python:3.7-slim
 
-# Запустить команду создания директории внутри контейнера
-RUN mkdir /app
+WORKDIR /code 
 
-# Скопировать с локального компьютера файл зависимостей
-# в директорию /app.
-COPY payment_service/requirements.txt /app
+COPY . .
 
-# Выполнить установку зависимостей внутри контейнера.
-RUN pip3 install -r /app/requirements.txt --no-cache-dir
-
-# Скопировать содержимое директории /RashTest c локального компьютера
-# в директорию /app.
-COPY payment_service/ /app
-
-# Сделать директорию /app рабочей директорией. 
-WORKDIR /app
+RUN pip install --upgrade pip && pip install -r /code/requirements.txt
 
 # Выполнить запуск сервера разработки при старте контейнера.
 CMD python manage.py makemigrations items && \

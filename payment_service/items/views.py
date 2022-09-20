@@ -1,5 +1,6 @@
 import stripe
 import json
+
 from django.conf import settings
 from django.views import View
 from django.http import JsonResponse
@@ -8,12 +9,12 @@ from django.views.generic.edit import CreateView
 from django.views.generic import ListView
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-
 from django.urls import reverse_lazy
 
 from .models import Item
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 class ItemCreateView(CreateView):
     model = Item
@@ -21,10 +22,12 @@ class ItemCreateView(CreateView):
     template_name = "item_create.html"
     success_url = reverse_lazy("home")
 
+
 class ItemListView(ListView):
     model = Item
     template_name = "items_list.html"
     context_object_name = 'items_list'
+
 
 class Item_Page_View(TemplateView):
     template_name = "landing.html"
@@ -38,12 +41,12 @@ class Item_Page_View(TemplateView):
         })
         return context
 
+
 class Create_Checkout_Session_Item_View(View):
     def get(self, request, *args, **kwargs):
         item_id = self.kwargs['pk']
         item = Item.objects.get(id=item_id)
         checkout_session = stripe.checkout.Session.create(
-            client_reference_id = request.user.id if request.user.is_authenticated else None,
             payment_method_types=['card'],
             line_items=[
                 {
@@ -76,15 +79,16 @@ def create_checkout_session(request, pk):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
     checkout_session = stripe.checkout.Session.create(
-        customer_email = request_data['email'],
+        customer_email=request_data['email'],
         payment_method_types=['card'],
-        allow_promotion_codes = True,
+        allow_promotion_codes=True,
         line_items=[
             {
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {
-                    'name': item.name,
+                        'name': item.name,
+                        'description': item.description,
                     },
                     'unit_amount': int(item.price * 100),
                 },
@@ -96,6 +100,7 @@ def create_checkout_session(request, pk):
         cancel_url='http://127.0.0.1:8000/cancel/',
     )
     return JsonResponse({'sessionId': checkout_session.id})
+
 
 class Success_View(TemplateView):
     template_name = "success.html"

@@ -9,42 +9,54 @@ from django.dispatch import receiver
 
 class Item(models.Model):
     CURRENCY_CHOICES = (
-            ('RUB','rub'),
-            ('USD','usd'),
+            ('RUB', 'rub'),
+            ('USD', 'usd'),
         )
-    
-    name = models.CharField(max_length=200, verbose_name='Название',
-                            null=False, unique=True)
-    description = models.CharField(max_length=200, verbose_name='Описание',
-                                   null=False, help_text='Описание')
+
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название товара',
+        null=False, unique=True
+        )
+    description = models.CharField(
+        max_length=200,
+        verbose_name='Описание товара',
+        null=False, help_text='Описание'
+        )
     price = models.PositiveSmallIntegerField(
         default=0,
         validators=[MinValueValidator(0, 'Значение не может быть меньше 0')],
-        verbose_name='Стоимость', help_text='На сайте оплаты в $'
-    )
-    currency = models.CharField(max_length=3, default='usd', verbose_name='Валюта',
-                                choices=CURRENCY_CHOICES)
-
+        verbose_name='Стоимость по умолчанию в рублях',
+        )
+    currency = models.CharField(
+        max_length=3,
+        default='RUB',
+        verbose_name='Стоимость пересчитается, в $ по курсу ЦБРФ',
+        choices=CURRENCY_CHOICES
+        )
 
     class Meta:
         verbose_name = 'Объект платежа'
         ordering = ['name']
 
-
     def get_absolute_url(self):
-        return reverse("create_session_page", kwargs={"pk" : self.pk})
+        return reverse("create_session_page", kwargs={"pk": self.pk})
 
-    
     def get_price(self):
         price = self.price
         currency = self.currency
         today = date.today()
         rates = ExchangeRates(today)
-        if currency != 'RUB':
+        dollar_curency = rates['USD'].value
+        if currency != 'RUB' and currency != 'USD':
             course = rates[currency].value
-            price = round(price / course)
-        else:
+            # Рассчет кросс курса, через переходной курс доллара из рублей
+            pre_price = (price / course)*(course / dollar_curency)
+            price = round(pre_price*dollar_curency)
+        elif currency == 'USD':
             pass
+        else:
+            price = ( price / dollar_curency)
         return int(price)
 
     def __str__(self):

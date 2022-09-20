@@ -10,9 +10,9 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Название единицы товара:</p>{{ item.product }}</h4>
-                    <p class="card-text">Цена за единицу товара:</p>{{ item.price }}</p>
+                    <p class="card-text">Цена за единицу товара:</p>{{ item.price }} $</p>
                     <p class="card-text">Количество единиц товара:</p>{{ item.quantity }}</p>
-                    <p class="card-text">Общая цена за выбранную позицию(с учетом количества):</p>{{ item.amount }}</p>
+                    <p class="card-text">Общая цена за выбранную позицию(с учетом количества):</p>{{ item.amount }} $</p>
                     <div class="col-12 col-md-1 item">
                         <form method="post" action="{% url 'cart_delete_item' item.pk %}">
                             {% csrf_token %}
@@ -24,7 +24,7 @@
         </div>
     </div>
 {% endfor %}
-<h5><class="card-title">Итого: {{ cart.amount }}</h5>
+<h5><class="card-title">Итого: {{ cart.amount }} $</h5>
 <div class="card-footer d-flex">
     <button id="buy-button">Создать интент на заказ</button>
 </div>

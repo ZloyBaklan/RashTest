@@ -1,17 +1,11 @@
-from tkinter import CASCADE
 from django.db import models
-from django.db.models import Sum
 from items.models import Item
-from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.contrib.auth.models import User
 
 
-#cart = Order.get_cart(request.user)
-#Скидки валюты
-#оформление заказа
 
 class Discount(models.Model):
     DURATION = (

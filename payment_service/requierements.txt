@@ -3,3 +3,4 @@ flake8==3.8.4
 python-dotenv==0.21.0
 requests==2.26.0
 virtualenv==20.10.0
+pycbrf==1.1.0

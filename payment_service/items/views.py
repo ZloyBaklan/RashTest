@@ -1,21 +1,17 @@
 import stripe
 import json
 from django.conf import settings
-from django.shortcuts import render
-from django.urls import reverse
 from django.views import View
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from django.core.paginator import Paginator
 from django.views.generic.edit import CreateView
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 
 from django.urls import reverse_lazy
 
 from .models import Item
-from orders.models import Order
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -44,17 +40,17 @@ class Item_Page_View(TemplateView):
 
 class Create_Checkout_Session_Item_View(View):
     def get(self, request, *args, **kwargs):
-        # request_data = json.loads(request.body)
         item_id = self.kwargs['pk']
         item = Item.objects.get(id=item_id)
         checkout_session = stripe.checkout.Session.create(
-            # customer_email = request_data['email'],
+            client_reference_id = request.user.id if request.user.is_authenticated else None,
             payment_method_types=['card'],
             line_items=[
                 {
                     'price_data': {
-                        'currency': 'usd',
-                        'unit_amount': int(item.price * 100),
+                        'currency': item.currency,
+                        'exchange_rate': 3,
+                        'unit_amount': item.amount,
                         'product_data': {
                             'name': item.name,
                             'description': item.description,
@@ -80,8 +76,6 @@ def create_checkout_session(request, pk):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
     checkout_session = stripe.checkout.Session.create(
-        # Customer Email is optional,
-        # It is not safe to accept email directly from the client side
         customer_email = request_data['email'],
         payment_method_types=['card'],
         allow_promotion_codes = True,

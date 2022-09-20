@@ -1,5 +1,4 @@
 from items.models import Item
-from django.db.models import Sum
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -11,7 +10,6 @@ from django.conf import settings
 from django.views import View
 from django.http import JsonResponse
 from django.views.generic import DeleteView, ListView, TemplateView
-from django.views.decorators.csrf import csrf_exempt
 from .models import Order, OrderItem, Tax, Discount, PromoCode
 from .forms import AddQuantityForm
 from django.shortcuts import get_object_or_404
@@ -31,7 +29,6 @@ def add_item_to_cart(request, pk):
             customer = User.objects.get(id=request.user.pk)
             if quantity:
                 cart = Order.get_cart(customer)
-                # product = Product.objects.get(pk=pk)
                 product = get_object_or_404(Item, pk=pk)
                 cart.orderitem_set.create(product=product,
                                           quantity=quantity,
@@ -91,15 +88,6 @@ class Order_Page_View(TemplateView):
 
 
 class Create_Checkout_Session_Order_View(View):
-    for tax in Tax.objects.all():
-                new_tax = stripe.TaxRate.create(
-                    display_name=tax.display_name,
-                    jurisdiction=tax.jurisdiction,
-                    percentage=tax.percentage,
-                    inclusive=tax.inclusive
-                )
-                tax.tax_id = new_tax.id
-                tax.save()
     
     def get(self, request, *args, **kwargs):
         order_id = self.kwargs['pk']
@@ -127,6 +115,16 @@ class Create_Checkout_Session_Order_View(View):
                 )
             else:
                 stripe.PromotionCode.modify(check_list[0].get(promo.code), metadata={"coupon": promo.coupon.id})
+        
+        for tax in Tax.objects.all():
+                new_tax = stripe.TaxRate.create(
+                    display_name=tax.display_name,
+                    jurisdiction=tax.jurisdiction,
+                    percentage=tax.percentage,
+                    inclusive=tax.inclusive
+                )
+                tax.tax_id = new_tax.id
+                tax.save()
 
         if request.user.is_authenticated:
             # Tax и настройку скидки делает админ
@@ -160,4 +158,3 @@ class Create_Checkout_Session_Order_View(View):
             })
         else:
             return redirect('home')
-

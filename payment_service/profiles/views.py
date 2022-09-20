@@ -1,7 +1,5 @@
 from django.urls.base import reverse, reverse_lazy
-from django.contrib.auth.decorators import login_required
 from django.views.generic import CreateView
-from django.shortcuts import get_object_or_404, render
 
 from .forms import CreationForm
 

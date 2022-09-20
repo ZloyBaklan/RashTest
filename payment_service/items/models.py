@@ -40,8 +40,8 @@ class Item(models.Model):
         currency = self.currency
         today = date.today()
         rates = ExchangeRates(today)
-        course = rates[currency].value
         if currency != 'RUB':
+            course = rates[currency].value
             price = round(price / course)
         else:
             pass

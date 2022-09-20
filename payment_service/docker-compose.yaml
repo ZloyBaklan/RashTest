@@ -13,5 +13,6 @@ services:
         volumes:
             - static_value:/templates/
         depends_on:
+            - db
         env_file:
             - ./.env

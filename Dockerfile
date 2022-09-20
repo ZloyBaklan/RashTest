@@ -8,7 +8,7 @@ WORKDIR /code
 
 COPY . .
 
-RUN pip install --upgrade pip && pip install -r /code/requirements.txt
+RUN pip install --upgrade pip && pip install -r /code/payment_service/requirements.txt
 
 # Выполнить запуск сервера разработки при старте контейнера.
 CMD python manage.py makemigrations items && \

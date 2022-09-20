@@ -13,17 +13,36 @@ from django.contrib.auth.models import User
 #Скидки валюты
 #оформление заказа
 
-class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
-    time = models.DateTimeField(auto_now_add=True)
-    comment = models.TextField(blank=True, null=True)
-    
-    class Meta:
-        ordering = ['pk']
+class Discount(models.Model):
+    DURATION = (
+        ('forever', 'forever'),
+        ('once', 'once'),
+        ('repeating', 'repeating')
+    )
+    percent_off = models.IntegerField()
+    duration = models.CharField(choices=DURATION, max_length=9)
+    duration_in_months = models.IntegerField(default=1, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.user} --- {self.time.ctime()} --- {self.amount}'
+        return f"{self.percent_off}%"
+
+
+class Tax(models.Model):
+    JURISDICTION = (
+        ('US', 'US'),
+        ('RU', 'RU')
+    )
+
+    tax_id = models.CharField(max_length=255)
+    display_name = models.CharField(default='vat', max_length=10)
+    jurisdiction = models.CharField(choices=JURISDICTION, max_length=2)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    inclusive = models.BooleanField()
+
+    def __str__(self):
+        return f"{self.jurisdiction} - {self.percentage}%"
+    
+
 
 class Order(models.Model):
     STATUS_CART = '1_cart'
@@ -33,12 +52,12 @@ class Order(models.Model):
         (STATUS_PAID, 'paid')
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # items = models.ManyToManyField(OrderItem, related_name='orders')
     status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_CART)
     amount = models.IntegerField( blank=True, null=True)
     creation_time = models.DateTimeField(auto_now_add=True)
-    payment = models.ForeignKey(Payment, on_delete=models.PROTECT, blank=True, null=True)
-    comment = models.TextField(blank=True, null=True)
+    tax = models.ForeignKey(Tax, on_delete=models.SET_NULL, blank=True, null=True)
+    discount = models.ManyToManyField(Discount, blank=True)
+    jurisdiction = models.CharField(max_length=2, default='RU')
     
     class Meta:
         ordering = ['pk']
@@ -63,23 +82,12 @@ class Order(models.Model):
     def get_absolute_url(self):
         return reverse("create_session_order_page", kwargs={"pk" : self.pk})
 
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Item, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
     price = models.IntegerField(null=True)
-    discount = models.IntegerField(default=0) 
-    '''
-    items=[{'price': 'price_CBb6IXqvTLXp3f'}],
-    coupon='free-period',
-
-    Альтернатива:
-    mode='subscription',
-    discounts=[{
-          'coupon': '{{COUPON_ID}}',
-    }],
-
-    '''
 
     class Meta:
         ordering = ['pk']
@@ -89,7 +97,7 @@ class OrderItem(models.Model):
     
     @property
     def amount(self):
-        return self.quantity*(self.price-self.discount)
+        return self.quantity*(self.price)
     
 @receiver(post_save, sender=OrderItem)
 def recalculate_order_amount_after_save(sender, instance, **kwargs):
@@ -104,16 +112,9 @@ def recalculate_order_amount_after_delete(sender, instance, **kwargs):
     order.save()
 
 
-class Status(models.Model):
-    name = models.CharField(max_length=24, blank=True, null=True, default=None)
-    is_active = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True, auto_now=False)
-    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+class PromoCode(models.Model):
+    code = models.CharField(max_length=255, unique=True)
+    coupon = models.ForeignKey(Discount, on_delete=models.CASCADE)
 
     def __str__(self):
-        return "Статус %s" % self.name
-
-    class Meta:
-        verbose_name = 'Статус заказа'
-        verbose_name_plural = 'Статусы заказа'
-
+        return f"{self.code}"

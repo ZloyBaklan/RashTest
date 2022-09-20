@@ -10,11 +10,11 @@ COPY . .
 
 RUN pip install --upgrade pip && pip install -r /code/payment_service/requirements.txt
 
-# Выполнить запуск сервера разработки при старте контейнера.
-CMD python manage.py makemigrations items && \
-    python manage.py makemigrations orders && \
-    python manage.py migrate && \
-    python manage.py runserver 0.0.0.0:8000
+ADD django_entrypoint.sh /django_entrypoint.sh
+
+RUN chmod a+x /django_entrypoint.sh
+
+ENTRYPOINT ["/django_entrypoint.sh"]
 
 ENV DJANGO_SECRET_KEY 'django-insecure--4!$a4k3a5riquz(vam8+*l378^#3kvunyvo5=-hg&7c!s7kf('
 ENV DEBUG False

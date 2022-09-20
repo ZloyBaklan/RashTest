@@ -38,7 +38,14 @@ Stripe-ключи необходимо получить с [Stripe](https://stri
 ```
 cd 'payment_service' 
 ```
-перейти в нужную директорию, в ней вы через команду:
+перейти в нужную директорию, не забудьте сделать и применить миграции:
+```
+python manage.py makemigrations
+```
+```
+python manage.py migrate
+```
+Иногда миграции не "встают", поэтому добавьте к makemigrations items, затем повторите для orders, далее создаем админа:
 ```
 python manage.py createsuperuser
 ```

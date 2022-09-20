@@ -9,14 +9,14 @@ RUN mkdir /app
 
 # Скопировать с локального компьютера файл зависимостей
 # в директорию /app.
-COPY requirements.txt /app
+COPY payment_service/requirements.txt /app
 
 # Выполнить установку зависимостей внутри контейнера.
 RUN pip3 install -r /app/requirements.txt --no-cache-dir
 
 # Скопировать содержимое директории /RashTest c локального компьютера
 # в директорию /app.
-COPY RashTest/ /app
+COPY payment_service/ /app
 
 # Сделать директорию /app рабочей директорией. 
 WORKDIR /app

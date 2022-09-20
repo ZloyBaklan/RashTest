@@ -4,3 +4,4 @@ python-dotenv==0.21.0
 requests==2.26.0
 virtualenv==20.10.0
 pycbrf==1.1.0
+stripe==4.1.0

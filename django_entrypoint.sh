@@ -8,7 +8,7 @@ python manage.py migrate
 
 # echo "Compressing static files."
 # python manage.py compress
-
+python manage.py runserver
 # Запускаем gunicorn на нашем $PORT
 # echo "Starting gunicorn"
 # gunicorn api.wsgi:application --bind 0.0.0.0:8000 \
